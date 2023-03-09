@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.lgu.ccss.sms.mapper.SmsMapperAltibase">	
+
+
+	<resultMap id="smsVo" type="com.lgu.ccss.sms.model.SmsVO">
+		<result property="msgId" 	column="MSG_ID" />
+		<result property="msgStatus" 	column="MSG_STATUS" />
+		<result property="code" 	column="CODE" />
+		<result property="msgTitle" 	column="MSG_TITLE" />
+		<result property="msgCont" 	column="MSG_CONT" />
+		<result property="msgType" 	column="MSG_TYPE" />
+		<result property="recvPhoneNo" 	column="RECV_PHONE_NO" />
+		<result property="sendType" 	column="SEND_TYPE" />
+		<result property="regDt" 	column="REG_DT" />
+		<result property="regId" 	column="REG_ID" />
+		<result property="updDt" 	column="UPD_DT" />
+		<result property="updId" 	column="UPD_ID" />
+		<result property="sendDt" 	column="SEND_DT" />
+		<result property="svrId" 	column="SVR_ID" />
+		<!-- <result property="orgNo" 	column="ORG_NO" /> -->
+		<result property="callbackNo" 	column="CALLBACK_NO" />
+		<result property="sendTryCnt" 	column="SEND_TRY_CNT" />
+		
+	</resultMap>
+	
+	<select id="selectSmsTargetList" resultMap="smsVo">
+	select
+		MSG_ID,MSG_STATUS,CODE,MSG_TITLE,MSG_CONT,MSG_TYPE,RECV_PHONE_NO,SEND_TYPE,
+		REG_DT,REG_ID,UPD_DT,UPD_ID,SEND_DT,SVR_ID,CALLBACK_NO,SEND_TRY_CNT
+	from(
+		select 
+			MSG_ID,
+			MSG_STATUS,
+			CODE,
+			MSG_TITLE,
+			MSG_CONT,
+			MSG_TYPE,
+			RECV_PHONE_NO,
+			SEND_TYPE,
+			TO_CHAR(REG_DT,'yyyymmddhh24miss') as REG_DT,
+			REG_ID,
+			TO_CHAR(UPD_DT,'yyyymmddhh24miss') as UPD_DT,
+			UPD_ID,
+			TO_CHAR(SEND_DT,'yyyymmddhh24miss') as SEND_DT,
+			SVR_ID,
+<!--  		ORG_NO,-->
+			CALLBACK_NO,
+			SEND_TRY_CNT
+		from 
+			TB_SMS_QUEUE
+		WHERE 
+			SEND_DT <![CDATA[<]]> TO_DATE(#{sendDt}, 'yyyymmddhh24miss')
+		AND
+			MSG_STATUS = #{msgStatus}
+		AND
+			SVR_ID = #{svrId}
+		)
+	where rownum <![CDATA[<]]>= #{rowCount}
+	ORDER BY MSG_ID ASC
+	</select>
+	<select id="selectTargetMsg" resultMap="smsVo">
+		select 
+			MSG_ID,
+			MSG_STATUS,
+			CODE,
+			MSG_TITLE,
+			MSG_CONT,
+			MSG_TYPE,
+			RECV_PHONE_NO,
+			SEND_TYPE,
+			TO_CHAR(REG_DT,'yyyymmddhh24miss') as REG_DT,
+			REG_ID,
+			TO_CHAR(UPD_DT,'yyyymmddhh24miss') as UPD_DT,
+			UPD_ID,
+			TO_CHAR(SEND_DT,'yyyymmddhh24miss') as SEND_DT,
+			SVR_ID,
+			ORG_NO,
+			CALLBACK_NO,
+			SEND_TRY_CNT
+		from 
+			TB_SMS_QUEUE
+		WHERE 
+			MSG_ID = #{msgId,javaType=int,jdbcType=NUMERIC}
+	</select>
+	<update id="updateSmsInitStatus" parameterType="com.lgu.ccss.sms.model.SmsVO">
+		UPDATE
+			TB_SMS_QUEUE
+		SET
+			MSG_STATUS = #{msgStatus},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE,
+			SEND_TRY_CNT = '0'
+		WHERE
+			MSG_STATUS = '0001'
+			
+	</update>
+	<update id="resetSmsStatus">
+		UPDATE
+			TB_SMS_QUEUE
+		SET
+			MSG_STATUS = '0000',
+			UPD_ID = 'SMSAGENT',
+			UPD_DT = SYSDATE
+	</update>
+	<update id="updateSmsTargetStatus" parameterType="com.lgu.ccss.sms.model.SmsVO">
+		UPDATE
+			TB_SMS_QUEUE
+		SET
+			SEND_TRY_CNT = #{sendTryCnt},
+			MSG_STATUS = #{msgStatus},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+		WHERE
+			MSG_ID = #{msgId}
+	</update>
+	<update id="updateSmsTargetStatusList" parameterType="list">
+		UPDATE
+			TB_SMS_QUEUE
+		SET
+			MSG_STATUS = #{msgStatus},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+		WHERE
+			MSG_ID =
+			<foreach item="smsVo" index="index" collection="list" open="(" separator="," close=")">
+				#{smsVo.msgId}
+			</foreach> 
+			
+	</update>
+	<update id="updateSmsTargetList" parameterType="com.lgu.ccss.sms.model.SmsVO">
+		UPDATE
+			TB_SMS_QUEUE
+		SET
+			SEND_TRY_CNT = #{sendTryCnt},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+		WHERE
+			MSG_ID = #{msgId}
+	</update>
+	<delete id="deleteSmsTarget" parameterType="com.lgu.ccss.sms.model.SmsVO">
+		delete
+		from 
+			TB_SMS_QUEUE
+		where 
+			MSG_ID = #{msgId}
+	</delete>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.lgu.ccss.sms.mapper.SmsMapperOracle">	
+	
+	<insert id="insertSmsSendHistory" parameterType="com.lgu.ccss.sms.model.SmsVO">
+		INSERT 
+			INTO TB_SMS_QUEUE_HIS(
+				MSG_ID,
+				MSG_STATUS,
+				CODE,
+				MSG_TITLE,
+				MSG_CONT,
+				MSG_TYPE,
+				RECV_PHONE_NO,
+				SEND_TYPE,
+				<!-- 2018.11.05 파티션테이블 reg_dt컬럼 삭제(process_dt컬럼과 중복) -->
+				<!-- REG_DT, -->
+				REG_ID,
+				UPD_DT,
+				UPD_ID,
+				SEND_DT,
+				SVR_ID,
+				ORG_NO,
+				CALLBACK_NO,
+				SEND_TRY_CNT,
+				PROCESS_DT,
+				RESULT_CODE
+			) 
+		VALUES (
+			#{msgId, jdbcType=VARCHAR},
+			#{msgStatus, jdbcType=VARCHAR},
+			#{code, jdbcType=VARCHAR},
+			#{msgTitle, jdbcType=VARCHAR},
+			#{msgCont, jdbcType=VARCHAR},
+			#{msgType, jdbcType=VARCHAR},
+			#{recvPhoneNo, jdbcType=VARCHAR},
+			#{sendType, jdbcType=VARCHAR},
+			<!-- SYSDATE, -->
+			#{regId, jdbcType=VARCHAR},
+			SYSDATE,
+			#{updId, jdbcType=VARCHAR},
+			TO_DATE(#{sendDt},'YYYYMMDDHH24MISS'),
+			#{svrId, jdbcType=VARCHAR},
+			#{orgNo, jdbcType=VARCHAR},
+			#{callbackNo, jdbcType=VARCHAR},
+			#{sendTryCnt, jdbcType=NUMERIC},
+			SYSDATE,
+			#{resultCode, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+</mapper>

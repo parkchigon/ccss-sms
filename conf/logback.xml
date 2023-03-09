@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+	<if condition='p("spring.profiles.active").equals("local")'>
+		<then>
+			<property name="LOG_LEVEL" value="DEBUG" />
+			<property name="LOG_DIR" value="/logs/ccsp/daemon" />
+		</then>
+	</if>
+	<if condition='p("spring.profiles.active").equals("dev")'>
+		<then>
+			<property name="LOG_LEVEL" value="DEBUG" />
+			<property name="LOG_DIR" value="/logs/ccsp/daemon" />
+		</then>
+	</if>
+	<if condition='p("spring.profiles.active").equals("real")'>
+		<then>
+			<property name="LOG_LEVEL" value="DEBUG" />
+			<property name="LOG_DIR" value="/logs/ccsp/daemon" />
+		</then>
+	</if>
+	<if condition='p("spring.profiles.active").equals("bmt")'>
+		<then>
+			<property name="LOG_LEVEL" value="DEBUG" />
+			<property name="LOG_DIR" value="/logs/ccsp/daemon" />
+		</then>
+	</if>
+	<if condition='p("spring.profiles.active").equals("bmt2")'>
+		<then>
+			<property name="LOG_LEVEL" value="DEBUG" />
+			<property name="LOG_DIR" value="/logs/ccsp/daemon" />
+		</then>
+	</if>
+
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<encoder>
+			<Pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5p] [%t] [%logger{0}.%method] %line - %msg%n</Pattern>
+		</encoder>
+	</appender>
+
+	<appender name="dailyRolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<prudent>true</prudent>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${SERVER_NAME}/${SERVER_NAME}-%d{yyyyMMdd-HH}.log</fileNamePattern>
+			<maxHistory>504</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<Pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5p] [%t] [%logger{0}.%method] %line - %msg%n</Pattern>
+		</encoder>
+	</appender>
+	<appender name="hangRolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<prudent>true</prudent>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${HANG_LOG_DIR}/daemon/${SERVER_NAME}/hang/${SERVER_NAME}.%d{yyyyMMdd}.log</fileNamePattern>
+			<maxHistory>170</maxHistory>
+		</rollingPolicy>  
+		<encoder>
+			<Pattern>%d{yyyy:MM:dd HH:mm:ss} %msg%n</Pattern>
+		</encoder>
+	</appender>
+	<logger name="com.lgu.ccss">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+	<logger name="HANGLogger">
+        <level value="TRACE" />
+        <appender-ref ref="hangRolling" />
+    </logger>
+	<!-- spring framework : core, beans, context, web -->
+	<logger name="org.springframework">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+
+	<!-- org.apache : ibatis, commons, catalina -->
+	<logger name="org.apache.ibatis">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+
+	<!-- java.sql : Connection, Statement, PreparedStatement -->
+	<logger name="java.sql">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+	
+	<logger name="jdbc.resultsettable">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+	<logger name="jdbc.sqlonly">
+		<level value="${LOG_LEVEL}" />
+		<appender-ref ref="dailyRolling" />
+	</logger>
+	
+
+	<root level="${LOG_LEVEL}">
+		<appender-ref ref="console" />
+		<appender-ref ref="dailyRolling" />
+	</root>
+
+</configuration>
